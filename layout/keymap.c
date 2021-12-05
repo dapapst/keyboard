@@ -91,8 +91,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_TAB,         KC_Q,           KC_W,           KC_E,           KC_R,           KC_T,           KC_F6,                                          KC_TRANSPARENT, KC_Z,           KC_U,           KC_I,           KC_O,           KC_P,           KC_TRANSPARENT,
     KC_MINUS,       KC_A,           KC_S,           KC_D,           KC_F,           KC_G,           KC_F5,                                                                          KC_TRANSPARENT, KC_H,           KC_J,           KC_K,           KC_L,           KC_TRANSPARENT, KC_TRANSPARENT,
     KC_LSHIFT,      KC_Y,           KC_X,           KC_C,           KC_V,           KC_B,                                           KC_N,           KC_M,           KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
-    KC_LCTRL,       KC_LALT,        KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_F3,                                                                                                          KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
-    KC_SPACE,       KC_TRANSPARENT, KC_TRANSPARENT,                 KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT
+    KC_LCTRL,       KC_LALT,        KC_8,           KC_9,           KC_0,           KC_F3,                                                                                                          KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
+    KC_SPACE,       KC_F2,          KC_F1,                 KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT
   ),
 };
 
@@ -172,6 +172,7 @@ uint8_t mod_state;
 bool shift_only_mod;
 bool alt_only_mod;
 bool ctrl_only_mod;
+bool alt_with_shift_only_mod;
 
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
@@ -182,6 +183,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     mod_state = get_mods();
     ctrl_only_mod = (!(mod_state & MOD_BIT(KC_LALT))  && !(mod_state & MOD_BIT(KC_LSHIFT)) && (mod_state & MOD_BIT(KC_LCTL)));
     alt_only_mod = ((mod_state & MOD_BIT(KC_LALT))  && !(mod_state & MOD_BIT(KC_LSHIFT)) && !(mod_state & MOD_BIT(KC_LCTL)));
+    alt_with_shift_only_mod = (((mod_state & MOD_BIT(KC_LALT)) || (mod_state & MOD_BIT(KC_LSHIFT))) && !(mod_state & MOD_BIT(KC_LCTL)));
     shift_only_mod = (!(mod_state & MOD_BIT(KC_LALT))  && (mod_state & MOD_BIT(KC_LSHIFT)) && !(mod_state & MOD_BIT(KC_LCTL)));
 
 
@@ -218,49 +220,52 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             process_key_default = false;
             break;
         case KC_A:
-            if (alt_only_mod){
+            if (alt_with_shift_only_mod && !shift_only_mod){
                 if (record->event.pressed){
                     register_code(KC_RALT);
                     register_code(KC_Q);
-                }else{
                     unregister_code(KC_Q);
                     unregister_code(KC_RALT);
+                }else{
+
                 }
                 process_key_default = false;
             }
             break;
         case KC_U:
-            if (alt_only_mod){
+            if (alt_with_shift_only_mod && !shift_only_mod){
                 if (record->event.pressed){
                     register_code(KC_RALT);
                     register_code(KC_Y);
-                }else{
                     unregister_code(KC_Y);
                     unregister_code(KC_RALT);
+                }else{
+
                 }
                 process_key_default = false;
             }
             break;
         case KC_S:
-            if (alt_only_mod){
+            if (alt_with_shift_only_mod && !shift_only_mod){
                 if (record->event.pressed){
                     register_code(KC_RALT);
                     register_code(KC_S);
-                }else{
                     unregister_code(KC_S);
                     unregister_code(KC_RALT);
+                }else{
+
                 }
                 process_key_default = false;
             }
             break;
         case KC_O:
-            if (alt_only_mod){
+            if (alt_with_shift_only_mod && !shift_only_mod){
                     if (record->event.pressed){
                         register_code(KC_RALT);
                         register_code(KC_P);
-                    }else{
                         unregister_code(KC_P);
                         unregister_code(KC_RALT);
+                    }else{
                     }
 
                     process_key_default = false;
@@ -271,9 +276,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     if (record->event.pressed){
                         register_code(KC_RALT);
                         register_code(KC_5);
-                    }else{
                         unregister_code(KC_5);
                         unregister_code(KC_RALT);
+                    }else{
+
                     }
                     process_key_default = false;
             }
@@ -281,11 +287,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case KC_Y:
             if (ctrl_only_mod){
                     if (record->event.pressed){
-                        register_code(KC_RALT);
                         register_code(KC_Z);
                     }else{
                         unregister_code(KC_Z);
-                        unregister_code(KC_RALT);
                     }
                     process_key_default = false;
             }
@@ -305,6 +309,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             // if it is only a tap(less than 200ms) and the layer wasnt used and only on key up, trigger backspace
             if(timer_elapsed(last_key_timer) < 200 && last_key_pressed == KC_BSPACE && !record->event.pressed)
                 tap_code(KC_BSPACE);
+
             break;
         default:
             process_key_default = true;
